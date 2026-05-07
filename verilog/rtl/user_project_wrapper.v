@@ -82,41 +82,44 @@ module user_project_wrapper #(
 /* User project is instantiated  here   */
 /*--------------------------------------*/
 
-user_proj_example mprj (
+// Drone core signals
+wire alert_empty_tank;
+wire valve_open;
+wire pump_pwm_out;
+
+drone_core mprj (
 `ifdef USE_POWER_PINS
 	.vccd1(vccd1),	// User area 1 1.8V power
 	.vssd1(vssd1),	// User area 1 digital ground
 `endif
 
-    .wb_clk_i(wb_clk_i),
-    .wb_rst_i(wb_rst_i),
+    .clk(wb_clk_i),
+    .rst_n(~wb_rst_i),
 
-    // MGMT SoC Wishbone Slave
+    // Inputs
+    .altitude(io_in[15:8]),
+    .tank_level(io_in[23:16]),
+    .system_en(io_in[24]),
 
-    .wbs_cyc_i(wbs_cyc_i),
-    .wbs_stb_i(wbs_stb_i),
-    .wbs_we_i(wbs_we_i),
-    .wbs_sel_i(wbs_sel_i),
-    .wbs_adr_i(wbs_adr_i),
-    .wbs_dat_i(wbs_dat_i),
-    .wbs_ack_o(wbs_ack_o),
-    .wbs_dat_o(wbs_dat_o),
-
-    // Logic Analyzer
-
-    .la_data_in(la_data_in),
-    .la_data_out(la_data_out),
-    .la_oenb (la_oenb),
-
-    // IO Pads
-
-    .io_in ({io_in[37:30],io_in[7:0]}),
-    .io_out({io_out[37:30],io_out[7:0]}),
-    .io_oeb({io_oeb[37:30],io_oeb[7:0]}),
-
-    // IRQ
-    .irq(user_irq)
+    // Outputs
+    .alert_empty_tank(alert_empty_tank),
+    .valve_open(valve_open),
+    .pump_pwm_out(pump_pwm_out)
 );
+
+// Connect outputs to GPIO pads
+assign io_out[25] = alert_empty_tank;
+assign io_out[26] = valve_open;
+assign io_out[27] = pump_pwm_out;
+assign io_out[37:28] = 10'b0;
+assign io_out[24:0] = 25'b0;
+
+// Set output enables (0 = output enabled, 1 = high impedance/input)
+assign io_oeb[25] = 1'b0;  // Output enabled
+assign io_oeb[26] = 1'b0;  // Output enabled
+assign io_oeb[27] = 1'b0;  // Output enabled
+assign io_oeb[37:28] = 10'h3FF;  // All inputs
+assign io_oeb[24:0] = 25'h1FFFFFF;  // All inputs
 
 endmodule	// user_project_wrapper
 
