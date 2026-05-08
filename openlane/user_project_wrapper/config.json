@@ -2,6 +2,7 @@
     "DESIGN_NAME": "user_project_wrapper",
     "VERILOG_FILES": [
         "dir::../../verilog/rtl/defines.v",
+        "dir::../../verilog/rtl/drone_core.v",
         "dir::../../verilog/rtl/user_project_wrapper.v"
     ],
     "ROUTING_CORES": 1,
